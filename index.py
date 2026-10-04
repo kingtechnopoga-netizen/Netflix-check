@@ -1,7 +1,7 @@
 import json
 import requests
-from vercel_runtime import HandlerResponse, HandlerEvent, HandlerContext
 
+# HTML Template for the frontend
 HTML_TEMPLATE = """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -105,11 +105,15 @@ class NetflixChecker:
         except Exception as e:
             return False, str(e)
 
-def handler(event: HandlerEvent, context: HandlerContext):
+def handler(event, context):
     method = event.get('requestContext', {}).get('http', {}).get('method', 'GET')
     
     if method == 'GET':
-        return {'statusCode': 200, 'headers': {'Content-Type': 'text/html'}, 'body': HTML_TEMPLATE}
+        return {
+            'statusCode': 200,
+            'headers': {'Content-Type': 'text/html'},
+            'body': HTML_TEMPLATE
+        }
     
     if method == 'POST':
         body = json.loads(event.get('body', '{}'))
@@ -121,6 +125,10 @@ def handler(event: HandlerEvent, context: HandlerContext):
             status, message = checker.check_cookie(cookie_str)
             results.append({'cookie': cookie_str[:50] + '...', 'status': status, 'message': message})
         
-        return {'statusCode': 200, 'headers': {'Content-Type': 'application/json'}, 'body': json.dumps({'results': results})}
+        return {
+            'statusCode': 200,
+            'headers': {'Content-Type': 'application/json'},
+            'body': json.dumps({'results': results})
+        }
     
     return {'statusCode': 405, 'body': 'Method Not Allowed'}
